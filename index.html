@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel Data Transformer with Mapping - Elker Import Format</title>
+    <title>Excel Data Transformer - Elker Import Format</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
         * {
@@ -43,6 +43,22 @@
         .header p {
             opacity: 0.9;
             font-size: 16px;
+            margin-bottom: 0;
+        }
+
+        .privacy-notice {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .privacy-notice strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
         }
 
         .steps-indicator {
@@ -675,14 +691,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Excel Data Transformer with Mapping</h1>
-            <p>Map your source data columns to Elker import format</p>
+            <h1>Excel Data Transformer</h1>
+            <p>Transform your Excel data into Elker import format</p>
+            <div class="privacy-notice">
+                <strong>🔒 Your data stays private</strong>
+                All processing happens locally in your browser. No files are uploaded to any server - your data never leaves your computer. This tool runs entirely client-side using JavaScript.
+            </div>
         </div>
 
         <div class="steps-indicator">
             <div class="step active" id="step1">
                 <div class="step-number">1</div>
-                <div class="step-label">Upload File</div>
+                <div class="step-label">Select File</div>
             </div>
             <div class="step" id="step2">
                 <div class="step-number">2</div>
@@ -699,8 +719,8 @@
             <div class="phase-upload" id="phaseUpload">
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-icon">📁</div>
-                    <div class="upload-text">Drop your Excel file here or click to browse</div>
-                    <div class="upload-subtext">Supports .xlsx and .xls files</div>
+                    <div class="upload-text">Drop your Excel file here or click to select</div>
+                    <div class="upload-subtext">Supports .xlsx and .xls files • File is processed locally in your browser</div>
                     <input type="file" id="fileInput" accept=".xlsx,.xls">
                 </div>
             </div>
