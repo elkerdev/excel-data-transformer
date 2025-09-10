@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Data Transformer - Elker Import Format</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #366092;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f7fafc;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+
+        .upload-area.dragging {
+            border-color: #667eea;
+            background: #e9f0ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #a0aec0;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .file-info h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .preview-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .preview-section.active {
+            display: block;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-header h3 {
+            color: #2d3748;
+            font-size: 20px;
+        }
+
+        .tab-container {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #4a5568;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .tab:hover {
+            background: #edf2f7;
+        }
+
+        .tab.active {
+            background: white;
+            color: #366092;
+            font-weight: 600;
+            border-bottom: 2px solid #366092;
+        }
+
+        .tab-content {
+            padding: 20px;
+            max-height: 400px;
+            overflow: auto;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #366092;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+
+        .status-message {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .status-message.active {
+            display: block;
+        }
+
+        .status-message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .status-message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .status-message.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .mapping-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .mapping-section.active {
+            display: block;
+        }
+
+        .mapping-header {
+            margin-bottom: 20px;
+        }
+
+        .mapping-header h3 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .mapping-header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .mapping-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .mapping-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mapping-source, .mapping-target {
+            font-size: 14px;
+        }
+
+        .mapping-source {
+            text-align: right;
+            color: #4a5568;
+        }
+
+        .mapping-arrow {
+            color: #cbd5e0;
+            font-size: 20px;
+        }
+
+        .mapping-target {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #366092;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Excel Data Transformer</h1>
+            <p>Transform your case data into Elker import format</p>
+        </div>
+
+        <div class="main-content">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drop your Excel file here or click to browse</div>
+                <div class="upload-subtext">Supports .xlsx and .xls files</div>
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+            </div>
+
+            <div class="status-message" id="statusMessage"></div>
+
+            <div class="file-info" id="fileInfo">
+                <h3>Source File Information</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">File Name</div>
+                        <div class="info-value" id="fileName">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">File Size</div>
+                        <div class="info-value" id="fileSize">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Total Records</div>
+                        <div class="info-value" id="recordCount">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Columns Found</div>
+                        <div class="info-value" id="columnCount">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mapping-section" id="mappingSection">
+                <div class="mapping-header">
+                    <h3>Data Transformation Summary</h3>
+                    <p>The following mappings will be applied during transformation</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="reportCount">0</div>
+                        <div class="stat-label">Reports</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="responseCount">0</div>
+                        <div class="stat-label">Responses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="messageCount">0</div>
+                        <div class="stat-label">Messages</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="noteCount">0</div>
+                        <div class="stat-label">Case Notes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="fileCount">0</div>
+                        <div class="stat-label">Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statusCount">0</div>
+                        <div class="stat-label">Status Changes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section" id="previewSection">
+                <div class="preview-header">
+                    <h3>Data Preview</h3>
+                </div>
+                <div class="tab-container">
+                    <div class="tabs" id="previewTabs"></div>
+                    <div class="tab-content" id="tabContent"></div>
+                </div>
+            </div>
+
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+
+            <div class="action-buttons" id="actionButtons" style="display: none;">
+                <button class="btn btn-secondary" onclick="resetForm()">
+                    <span>↺</span> Reset
+                </button>
+                <button class="btn btn-primary" id="transformBtn" onclick="transformData()">
+                    <span>⚡</span> Transform & Download
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sourceData = null;
+        let transformedData = null;
+        let fileName = '';
+
+        // Initialize upload area
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragging');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragging');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragging');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            fileName = file.name;
+            
+            // Update file info
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            
+            showStatus('info', 'Reading file...');
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    
+                    // Get the first sheet
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Convert to JSON
+                    sourceData = XLSX.utils.sheet_to_json(worksheet, { 
+                        raw: false,
+                        dateNF: 'yyyy-mm-dd hh:mm:ss'
+                    });
+                    
+                    // Update UI
+                    document.getElementById('recordCount').textContent = sourceData.length;
+                    document.getElementById('columnCount').textContent = Object.keys(sourceData[0] || {}).length;
+                    
+                    document.getElementById('fileInfo').classList.add('active');
+                    document.getElementById('actionButtons').style.display = 'flex';
+                    
+                    // Analyze and show mapping
+                    analyzeData();
+                    
+                    showStatus('success', `Successfully loaded ${sourceData.length} records`);
+                    
+                } catch (error) {
+                    console.error('Error reading file:', error);
+                    showStatus('error', 'Error reading file: ' + error.message);
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        function analyzeData() {
+            if (!sourceData || sourceData.length === 0) return;
+
+            // Count different types of data that will be generated
+            let messageCount = 0;
+            let noteCount = 0;
+            let fileCount = 0;
+            let statusCount = 0;
+
+            sourceData.forEach(row => {
+                // Count messages from Communication column
+                if (row['Communication'] && row['Communication'].trim()) {
+                    // Count individual messages (separated by timestamps)
+                    const matches = row['Communication'].match(/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+(AM|PM)/g);
+                    messageCount += matches ? matches.length : 1;
+                }
+                
+                // Count case notes from Casework and Internal communications
+                if (row['Casework'] && row['Casework'].trim()) {
+                    const matches = row['Casework'].match(/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+(AM|PM)/g);
+                    noteCount += matches ? matches.length : 1;
+                }
+                if (row['Internal communications'] && row['Internal communications'].trim()) {
+                    const matches = row['Internal communications'].match(/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+(AM|PM)/g);
+                    noteCount += matches ? matches.length : 1;
+                }
+                
+                // Count files (check for file attachments mentioned in text)
+                if (row['Supporting documentation'] && row['Supporting documentation'] !== '-1') {
+                    fileCount++;
+                }
+                if (row['Communication'] && row['Communication'].includes('File attachment:')) {
+                    fileCount++;
+                }
+                
+                // Count status changes
+                if (row['Current status'] || row['Workflow Status']) {
+                    statusCount++;
+                }
+            });
+
+            // Update stats
+            document.getElementById('reportCount').textContent = sourceData.length;
+            document.getElementById('responseCount').textContent = sourceData.length; // One response row per report
+            document.getElementById('messageCount').textContent = messageCount;
+            document.getElementById('noteCount').textContent = noteCount;
+            document.getElementById('fileCount').textContent = fileCount;
+            document.getElementById('statusCount').textContent = statusCount;
+
+            document.getElementById('mappingSection').classList.add('active');
+        }
+
+        function transformData() {
+            if (!sourceData) {
+                showStatus('error', 'No data to transform');
+                return;
+            }
+
+            showStatus('info', 'Transforming data...');
+            document.getElementById('progressBar').classList.add('active');
+            updateProgress(0);
+
+            try {
+                // Initialize output sheets
+                const reportList = [];
+                const reportResponses = [];
+                const messages = [];
+                const caseNotes = [];
+                const files = [];
+                const statusChanges = [];
+                const unstructuredData = [];
+
+                const totalSteps = sourceData.length;
+                let currentStep = 0;
+
+                sourceData.forEach((row, index) => {
+                    // Generate Report ID
+                    const reportId = row['Case Id'] || `IMPORT-${String(index + 1).padStart(4, '0')}`;
+
+                    // Transform Report List
+                    reportList.push({
+                        'Report_ID': reportId,
+                        'Report_Submitted_Date': formatDate(row['Report date']),
+                        'Report_Assignees': row['Responsible Case Manager '] || '',
+                        'Reporter_Email': row['Discloser Email Address'] || extractEmail(row),
+                        'Reporter_Name': row['Discloser Name'] || extractReporterName(row),
+                        'Reporter_Phone_Number': row['Discloser Contact Number'] || extractPhone(row),
+                        'Report_Attribute_Discloser_Anonymity': row['Anonymity Status'] || row['[Client]: Anonymity status dropdown'] || '',
+                        'Report_Attribute_In_Scope_or_Out_of_Scope': row['In scope / Out of scope'] || '',
+                        'Report_Attribute_Reporting_channel': row['Reporting Channel'] || row['Reporting type'] || '',
+                        'Report_Attribute_Received_by': row['In Scope - Received by'] || row['Out of Scope - Received by '] || '',
+                        'Report_Attribute_Classification': row['Classification'] || '',
+                        'Report_Attribute_Date_report_sent_to_client': formatDate(row['In Scope - Date of Disclosure'] || row['Out of Scope - Date of Disclosure [DD/MM/YY]']),
+                        'Report_Attribute_Discloser_Type': row['Type of Discloser'] || '',
+                        'Report_Attribute_Country': row['Country'] || '',
+                        'Report_Attribute_What_location_has_the_concern_occurred_in': row['Geographic location of wrongdoing'] || row['[Client]: Location of wrongdoing (Country, State, Division, Business Unit). '] || '',
+                        'Report_Attribute_Previously_reported_through_another_channel': row['Have concerns been raised via other channels'] || row['[Client]: Have you tried to raise your concerns via any other channel? '] || '',
+                        'Report_Attribute_Personal_Safety_or_Welfare_Concerns': row['Concerns for welfare'] || '',
+                        'Report_Attribute_Desired_Outcome': row['Outcomes'] || '',
+                        'Report_Attribute_Outcome_Description': row['[Client]: Do you have any suggestions on how it would be best to address your concerns?'] || '',
+                        'Report_Attribute_Was_any_supporting_documentation_provided': row['Supporting documentation'] || '',
+                        'Report_Attribute_Case_Conclusion': row['Conclusion'] || '',
+                        'Report_Attribute_Discloser_intends_to_communicate_further': row['[Client]: Would you like someone to contact you?'] || ''
+                    });
+
+                    // Transform Report Responses (Questions)
+                    const response = {
+                        'Report_ID': reportId
+                    };
+
+                    // Map questions to columns
+                    const questionMappings = {
+                        'Question_This_disclosure_will_be_received_by': 'KPMG FairCall team',
+                        'Question_Would_you_like_to_remain_anonymous': row['Anonymity Status'] || row['[Client]: Anonymity status dropdown'] || '',
+                        'Question_Please_provide_your_name_and_contact_details': extractContactDetails(row),
+                        'Question_Consent_to_share_the_content': row['Consent'] || row['[Client]: Consent - Information to be used/shared with Whistleblower Program'] || '',
+                        'Question_How_are_you_associated_with_the_organisation': row['Type of Discloser'] || row['[Client]: Your employment status dropdown'] || '',
+                        'Question_Please_describe_what_happened': row['What has occurred'] || row['[Client]:  What is the wrongdoing that you are concerned about? '] || row['Case overview'] || '',
+                        'Question_Would_you_like_to_provide_supporting_documentation': row['Supporting documentation'] && row['Supporting documentation'] !== '-1' ? 'Yes' : 'No',
+                        'Question_What_outcome_are_you_seeking': row['Outcomes'] || '',
+                        'Question_What_location_has_the_concern_occurred_in': row['Geographic location of wrongdoing'] || row['[Client]: Location of wrongdoing (Country, State, Division, Business Unit). '] || '',
+                        'Question_Have_you_raised_your_concerns_via_any_other_channel': row['Have concerns been raised via other channels'] || row['[Client]: Have you tried to raise your concerns via any other channel? '] || '',
+                        'Question_Please_provide_details_of_who_you_raised': row['Who has the Discloser be referred to? (E.g. A general enquiry line, a complaint line, Head Office, HR). '] || '',
+                        'Question_Do_you_have_any_of_the_following_concerns': row['Concerns for welfare'] || row['Concern for welfare description'] || '',
+                        'Question_Do_you_intend_to_remain_engaged_involved': row['[Client]: Would you like someone to contact you?'] || '',
+                        'Question_Please_review_your_information': 'Confirmed'
+                    };
+
+                    Object.assign(response, questionMappings);
+                    reportResponses.push(response);
+
+                    // Extract Messages from Communication column
+                    if (row['Communication'] && row['Communication'].trim()) {
+                        const communicationMessages = parseTimestampedContent(row['Communication']);
+                        communicationMessages.forEach(msg => {
+                            messages.push({
+                                'Report_ID': reportId,
+                                'Message_Content': msg.content,
+                                'Message_Author': msg.author || 'system@elker.com',
+                                'Message_DateTime': formatDateTime(msg.date)
+                            });
+                        });
+                    }
+
+                    // Extract Case Notes from Casework and Internal communications
+                    if (row['Casework'] && row['Casework'].trim()) {
+                        const caseworkNotes = parseTimestampedContent(row['Casework']);
+                        caseworkNotes.forEach(note => {
+                            caseNotes.push({
+                                'Report_ID': reportId,
+                                'Case_Note_Content': note.content,
+                                'Case_Note_Author': note.author || 'system@elker.com',
+                                'Case_Note_DateTime': formatDateTime(note.date)
+                            });
+                        });
+                    }
+                    
+                    if (row['Internal communications'] && row['Internal communications'].trim()) {
+                        const internalNotes = parseTimestampedContent(row['Internal communications']);
+                        internalNotes.forEach(note => {
+                            caseNotes.push({
+                                'Report_ID': reportId,
+                                'Case_Note_Content': note.content,
+                                'Case_Note_Author': note.author || 'system@elker.com',
+                                'Case_Note_DateTime': formatDateTime(note.date)
+                            });
+                        });
+                    }
+
+                    // Extract Files
+                    if (row['Supporting documentation'] && row['Supporting documentation'] !== '-1') {
+                        files.push({
+                            'Report_ID': reportId,
+                            'File_Name': 'supporting-documentation.pdf',
+                            'File_Uploaded_By': row['Discloser Email Address'] || 'reporter@elker.com',
+                            'File_Uploaded_DateTime': formatDateTime(row['Report date']),
+                            'File_Visibility': 'All'
+                        });
+                    }
+                    
+                    // Check for file attachments in Communication
+                    if (row['Communication'] && row['Communication'].includes('File attachment:')) {
+                        const fileMatches = row['Communication'].match(/File attachment: ([^\n]+)/g);
+                        if (fileMatches) {
+                            fileMatches.forEach(match => {
+                                const fileName = match.replace('File attachment: ', '').trim();
+                                files.push({
+                                    'Report_ID': reportId,
+                                    'File_Name': fileName,
+                                    'File_Uploaded_By': 'system@elker.com',
+                                    'File_Uploaded_DateTime': formatDateTime(row['Report date']),
+                                    'File_Visibility': 'All'
+                                });
+                            });
+                        }
+                    }
+
+                    // Extract Status Changes
+                    if (row['Current status'] || row['Workflow Status']) {
+                        const currentStatus = row['Current status'] || row['Workflow Status'];
+                        statusChanges.push({
+                            'Report_ID': reportId,
+                            'Status_Changed_From': 'New',
+                            'Status_Changed_To': currentStatus,
+                            'Status_Change_Author': row['Responsible Case Manager '] || 'system@elker.com',
+                            'Activity_DateTime': formatDateTime(row['Report date'])
+                        });
+                    }
+
+                    // Collect any unstructured data
+                    const unstructuredContent = collectUnstructuredData(row);
+                    if (unstructuredContent) {
+                        unstructuredData.push({
+                            'Report_ID': reportId,
+                            'Unstructured_Data_Content': unstructuredContent
+                        });
+                    }
+
+                    currentStep++;
+                    updateProgress((currentStep / totalSteps) * 100);
+                });
+
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                
+                // Add sheets
+                addSheetToWorkbook(wb, reportList, 'Report List');
+                addSheetToWorkbook(wb, reportResponses, 'Report Responses');
+                addSheetToWorkbook(wb, messages, 'Messages');
+                addSheetToWorkbook(wb, caseNotes, 'Case Notes');
+                addSheetToWorkbook(wb, files, 'Files');
+                addSheetToWorkbook(wb, statusChanges, 'Status Changes');
+                addSheetToWorkbook(wb, unstructuredData, 'Unstructured Data');
+
+                // Show preview
+                showPreview(wb);
+
+                // Save the workbook
+                const outputFileName = `transformed_${fileName.replace(/\.[^/.]+$/, '')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                XLSX.writeFile(wb, outputFileName);
+
+                showStatus('success', `Successfully transformed and downloaded: ${outputFileName}`);
+                document.getElementById('progressBar').classList.remove('active');
+
+            } catch (error) {
+                console.error('Transformation error:', error);
+                showStatus('error', 'Error during transformation: ' + error.message);
+                document.getElementById('progressBar').classList.remove('active');
+            }
+        }
+
+        function addSheetToWorkbook(workbook, data, sheetName) {
+            if (data.length === 0) {
+                // Create empty sheet with headers
+                const headers = getHeadersForSheet(sheetName);
+                const ws = XLSX.utils.json_to_sheet([headers], { header: Object.keys(headers) });
+                XLSX.utils.book_append_sheet(workbook, ws, sheetName);
+            } else {
+                const ws = XLSX.utils.json_to_sheet(data);
+                XLSX.utils.book_append_sheet(workbook, ws, sheetName);
+            }
+        }
+
+        function getHeadersForSheet(sheetName) {
+            const headers = {
+                'Report List': {
+                    'Report_ID': '',
+                    'Report_Submitted_Date': '',
+                    'Report_Assignees': '',
+                    'Reporter_Email': '',
+                    'Reporter_Name': '',
+                    'Reporter_Phone_Number': ''
+                },
+                'Report Responses': {
+                    'Report_ID': ''
+                },
+                'Messages': {
+                    'Report_ID': '',
+                    'Message_Content': '',
+                    'Message_Author': '',
+                    'Message_DateTime': ''
+                },
+                'Case Notes': {
+                    'Report_ID': '',
+                    'Case_Note_Content': '',
+                    'Case_Note_Author': '',
+                    'Case_Note_DateTime': ''
+                },
+                'Files': {
+                    'Report_ID': '',
+                    'File_Name': '',
+                    'File_Uploaded_By': '',
+                    'File_Uploaded_DateTime': '',
+                    'File_Visibility': ''
+                },
+                'Status Changes': {
+                    'Report_ID': '',
+                    'Status_Changed_From': '',
+                    'Status_Changed_To': '',
+                    'Status_Change_Author': '',
+                    'Activity_DateTime': ''
+                },
+                'Unstructured Data': {
+                    'Report_ID': '',
+                    'Unstructured_Data_Content': ''
+                }
+            };
+            return headers[sheetName] || {};
+        }
+
+        function showPreview(workbook) {
+            const previewSection = document.getElementById('previewSection');
+            const tabsContainer = document.getElementById('previewTabs');
+            const contentContainer = document.getElementById('tabContent');
+            
+            tabsContainer.innerHTML = '';
+            
+            workbook.SheetNames.forEach((sheetName, index) => {
+                const tab = document.createElement('button');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = sheetName;
+                tab.onclick = () => showSheet(workbook, sheetName, tab);
+                tabsContainer.appendChild(tab);
+            });
+            
+            if (workbook.SheetNames.length > 0) {
+                showSheet(workbook, workbook.SheetNames[0]);
+            }
+            
+            previewSection.classList.add('active');
+        }
+
+        function showSheet(workbook, sheetName, tabElement) {
+            const contentContainer = document.getElementById('tabContent');
+            const sheet = workbook.Sheets[sheetName];
+            const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if (tabElement) {
+                tabElement.classList.add('active');
+            } else {
+                document.querySelector('.tab').classList.add('active');
+            }
+            
+            // Create table
+            let html = '<div class="table-wrapper"><table>';
+            
+            data.slice(0, 10).forEach((row, rowIndex) => {
+                html += '<tr>';
+                row.forEach(cell => {
+                    const tag = rowIndex === 0 ? 'th' : 'td';
+                    html += `<${tag}>${cell || ''}</${tag}>`;
+                });
+                html += '</tr>';
+            });
+            
+            if (data.length > 10) {
+                html += '<tr><td colspan="' + (data[0] || []).length + '" style="text-align: center; font-style: italic;">... and ' + (data.length - 10) + ' more rows</td></tr>';
+            }
+            
+            html += '</table></div>';
+            contentContainer.innerHTML = html;
+        }
+
+        // Helper functions
+        function parseTimestampedContent(text) {
+            if (!text) return [];
+            
+            const entries = [];
+            // Pattern for timestamps like "12/20/2022 12:27:30 PM - KPMG Team Member 1"
+            const pattern = /(\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+(AM|PM))\s*-\s*([^\\n]+)/g;
+            const lines = text.split('------------').filter(s => s.trim());
+            
+            lines.forEach(section => {
+                const matches = [...section.matchAll(pattern)];
+                if (matches.length > 0) {
+                    matches.forEach(match => {
+                        const dateStr = match[1];
+                        const author = match[3].trim();
+                        // Get content after this line until next timestamp or end
+                        const startIndex = section.indexOf(match[0]) + match[0].length;
+                        let endIndex = section.length;
+                        
+                        // Find next timestamp
+                        const nextMatch = pattern.exec(section.substring(startIndex));
+                        if (nextMatch) {
+                            endIndex = startIndex + section.substring(startIndex).indexOf(nextMatch[0]);
+                        }
+                        
+                        const content = section.substring(startIndex, endIndex).trim();
+                        
+                        entries.push({
+                            date: dateStr,
+                            author: author.includes('@') ? author : author + '@elker.com',
+                            content: content || section.trim()
+                        });
+                    });
+                } else {
+                    // No timestamp found, treat as single entry
+                    entries.push({
+                        date: new Date().toISOString(),
+                        author: 'system@elker.com',
+                        content: section.trim()
+                    });
+                }
+            });
+            
+            return entries;
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                return date.toISOString().split('T')[0];
+            } catch {
+                return dateStr;
+            }
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return new Date().toISOString().replace('T', ' ').slice(0, 19);
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                return date.toISOString().replace('T', ' ').slice(0, 19);
+            } catch {
+                return dateStr;
+            }
+        }
+
+        function extractEmail(row) {
+            // Look for email in various columns
+            return row['Reporter email'] || row['Email'] || row['Contact email'] || '';
+        }
+
+        function extractReporterName(row) {
+            return row['Reporter name'] || row['Name'] || row['Full name'] || '';
+        }
+
+        function extractPhone(row) {
+            return row['Phone'] || row['Phone number'] || row['Contact number'] || '';
+        }
+
+        function extractClassification(row) {
+            // Map to standard classifications
+            return row['Classification'] || row['Category'] || row['Type'] || '';
+        }
+
+        function extractSafetyConcerns(row) {
+            return row['Safety concerns'] || row['Welfare concerns'] || '';
+        }
+
+        function extractContactDetails(row) {
+            const name = extractReporterName(row);
+            const email = extractEmail(row);
+            const phone = extractPhone(row);
+            
+            let details = [];
+            if (name) details.push(`Name: ${name}`);
+            if (email) details.push(`Email: ${email}`);
+            if (phone) details.push(`Phone: ${phone}`);
+            
+            return details.join(', ');
+        }
+
+        function extractDescription(row) {
+            // Look for description in various columns
+            return row['What has occurred'] || row['[Client]:  What is the wrongdoing that you are concerned about? '] || row['Case overview'] || '';
+        }
+
+        function collectUnstructuredData(row) {
+            // Collect any additional data that doesn't fit the schema
+            const excludeKeys = ['Case Id', 'Report date', 'Country', 'Status', 'Location', 'Anonymous'];
+            const unstructured = [];
+            
+            for (let key in row) {
+                if (!excludeKeys.some(k => key.includes(k)) && 
+                    !key.startsWith('Message') && 
+                    !key.includes('Case note') && 
+                    !key.includes('File')) {
+                    if (row[key] && row[key].length > 100) {
+                        unstructured.push(`${key}: ${row[key]}`);
+                    }
+                }
+            }
+            
+            return unstructured.join('\n\n');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i), 2) + ' ' + sizes[i];
+        }
+
+        function showStatus(type, message) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.className = `status-message active ${type}`;
+            statusElement.textContent = message;
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusElement.classList.remove('active');
+                }, 5000);
+            }
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function resetForm() {
+            sourceData = null;
+            transformedData = null;
+            fileName = '';
+            
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').classList.remove('active');
+            document.getElementById('mappingSection').classList.remove('active');
+            document.getElementById('previewSection').classList.remove('active');
+            document.getElementById('actionButtons').style.display = 'none';
+            document.getElementById('statusMessage').classList.remove('active');
+            document.getElementById('progressBar').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
