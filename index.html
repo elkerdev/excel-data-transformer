@@ -1336,16 +1336,39 @@
                     
                     // Field type
                     const typeCell = document.createElement('td');
+
+                    // Check if this is an auto-filled field first (need to define it here too)
+                    const isAutoFilledField = sheetConfig.multiRow &&
+                        !field.name.includes('_Content') &&
+                        !field.name.includes('Changed_To') &&
+                        !field.name.includes('File_Name') &&
+                        field.name !== 'Report_ID';
+
                     let typeClass = '';
                     if (field.type === 'timestamp') typeClass = 'timestamp';
                     if (sheetConfig.multiRow) typeClass = 'multi';
-                    typeCell.innerHTML = `<span class="field-type ${typeClass}">${field.type}</span>`;
+
+                    if (isAutoFilledField) {
+                        typeCell.innerHTML = `<span class="field-type" style="background: #e0f2fe; color: #0369a1; border-color: #7dd3fc;">auto</span>`;
+                    } else {
+                        typeCell.innerHTML = `<span class="field-type ${typeClass}">${field.type}</span>`;
+                    }
                     row.appendChild(typeCell);
                     
                     // Source column dropdown or multi-select
                     const selectCell = document.createElement('td');
-                    
-                    if (field.type === 'multi-column') {
+
+                    // Check if this is an auto-filled field in multi-row sheets
+                    const isAutoFilledField = sheetConfig.multiRow &&
+                        !field.name.includes('_Content') &&
+                        !field.name.includes('Changed_To') &&
+                        !field.name.includes('File_Name') &&
+                        field.name !== 'Report_ID';
+
+                    if (isAutoFilledField) {
+                        // Show that this field is auto-generated
+                        selectCell.innerHTML = '<span style="color: #6b7280; font-style: italic; font-size: 0.875rem;">Auto-generated from content column</span>';
+                    } else if (field.type === 'multi-column') {
                         // Create checkboxes for multi-column selection
                         const checkboxContainer = document.createElement('div');
                         checkboxContainer.style.maxHeight = '150px';
@@ -1484,7 +1507,20 @@
                     const sampleCell = document.createElement('td');
                     sampleCell.id = `sample_${sheetName}_${field.name}`;
                     sampleCell.className = 'sample-data';
-                    if (field.type === 'multi-column') {
+                    if (isAutoFilledField) {
+                        // Show example of what will be auto-generated
+                        if (field.name.includes('Author')) {
+                            sampleCell.textContent = 'e.g., system, or parsed from content';
+                        } else if (field.name.includes('DateTime') || field.name.includes('Date_Time')) {
+                            sampleCell.textContent = 'e.g., 2024-01-15 10:30:00';
+                        } else if (field.name === 'Status_Changed_From') {
+                            sampleCell.textContent = 'e.g., New';
+                        } else {
+                            sampleCell.textContent = 'Auto-generated';
+                        }
+                        sampleCell.style.fontStyle = 'italic';
+                        sampleCell.style.color = '#9ca3af';
+                    } else if (field.type === 'multi-column') {
                         sampleCell.textContent = 'Select columns to include';
                         sampleCell.style.fontStyle = 'italic';
                     } else {
