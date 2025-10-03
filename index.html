@@ -845,8 +845,8 @@
                     <div class="upload-icon">📁</div>
                     <div class="upload-text">Drop your Excel file here or click to select</div>
                     <div class="upload-subtext">Supports .xlsx and .xls files • File is processed locally in your browser</div>
-                    <input type="file" id="fileInput" accept=".xlsx,.xls">
                 </div>
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
             </div>
 
             <!-- Phase 2: Mapping -->
@@ -1337,16 +1337,15 @@
                     `;
                     row.appendChild(fieldCell);
                     
-                    // Field type
-                    const typeCell = document.createElement('td');
-
-                    // Check if this is an auto-filled field first (need to define it here too)
+                    // Check if this is an auto-filled field (define once, use throughout)
                     const isAutoFilledField = sheetConfig.multiRow &&
                         !field.name.includes('_Content') &&
                         !field.name.includes('Changed_To') &&
                         !field.name.includes('File_Name') &&
                         field.name !== 'Report_ID';
 
+                    // Field type
+                    const typeCell = document.createElement('td');
                     let typeClass = '';
                     if (field.type === 'timestamp') typeClass = 'timestamp';
                     if (sheetConfig.multiRow) typeClass = 'multi';
@@ -1357,16 +1356,9 @@
                         typeCell.innerHTML = `<span class="field-type ${typeClass}">${field.type}</span>`;
                     }
                     row.appendChild(typeCell);
-                    
+
                     // Source column dropdown or multi-select
                     const selectCell = document.createElement('td');
-
-                    // Check if this is an auto-filled field in multi-row sheets
-                    const isAutoFilledField = sheetConfig.multiRow &&
-                        !field.name.includes('_Content') &&
-                        !field.name.includes('Changed_To') &&
-                        !field.name.includes('File_Name') &&
-                        field.name !== 'Report_ID';
 
                     if (isAutoFilledField) {
                         // Show that this field is auto-generated
