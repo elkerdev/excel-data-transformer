@@ -1675,19 +1675,23 @@
                     if (field.type === 'multi-column') {
                         // Get all checked checkboxes for multi-column fields
                         const container = document.getElementById(elementId);
-                        const checkedBoxes = container.querySelectorAll('input[type="checkbox"]:checked');
-                        const selectedColumns = Array.from(checkedBoxes).map(cb => cb.value);
-                        if (selectedColumns.length > 0) {
-                            columnMappings[sheetName][field.name] = selectedColumns;
+                        if (container) {
+                            const checkedBoxes = container.querySelectorAll('input[type="checkbox"]:checked');
+                            const selectedColumns = Array.from(checkedBoxes).map(cb => cb.value);
+                            if (selectedColumns.length > 0) {
+                                columnMappings[sheetName][field.name] = selectedColumns;
+                            }
                         }
                     } else {
                         // Get value from searchable dropdown
                         const container = document.getElementById(elementId);
-                        const input = container.querySelector('.searchable-select-input');
-                        if (input) {
-                            const value = input.getAttribute('data-value');
-                            if (value) {
-                                columnMappings[sheetName][field.name] = value;
+                        if (container) {
+                            const input = container.querySelector('.searchable-select-input');
+                            if (input) {
+                                const value = input.getAttribute('data-value');
+                                if (value) {
+                                    columnMappings[sheetName][field.name] = value;
+                                }
                             }
                         }
                     }
