@@ -1,0 +1,127 @@
+{
+  "name": "EQS Export",
+  "version": "1.0",
+  "exportedAt": "2026-02-09T00:00:00.000Z",
+  "preset": {
+    "mappings": {
+      "Report List": {
+        "Report_ID": "Case Id",
+        "Report_Submitted_Date": "Report date",
+        "Report_Assignees": "Responsible Case Manager ",
+        "Reporter_Email": "ContactInformation",
+        "Reporter_Name": "ContactInformation",
+        "Reporter_Phone_Number": "ContactInformation",
+        "Report_Attribute_legacy-report-id-and-case-id-from-eqs": "Field: Previous system Case ID",
+        "Report_Attribute_identification-status": "Field: 6   Discloser anonymity",
+        "Report_Attribute_in-scope-or-out-of-scope": "Field: 1  In Scope or Out of Scope or Test",
+        "Report_Attribute_reporting-pathway": "Field: 5   Reporting Channel",
+        "Report_Attribute_received-by": "Responsible Case Manager ",
+        "Report_Attribute_classification": "Classification",
+        "Report_Attribute_date-report-sent-to-client": "Field: 4  Date report sent to client",
+        "Report_Attribute_discloser-type": "Field: 10   Discloser Type",
+        "Report_Attribute_country-s": "Country",
+        "Report_Attribute_what-location-has-the-concern-occurred-in": "location of concern",
+        "Report_Attribute_previously-reported-through-another-channel": "Field: Has this issue been communicated through any other channel?",
+        "Report_Attribute_personal-safety-or-welfare-concerns": "WelfareDropdown",
+        "Report_Attribute_desired-outcome": "OutcomeTextbox",
+        "Report_Attribute_resolution-description": "Field: Resolution Description",
+        "Report_Attribute_was-any-supporting-evidence-provided": "Field: Was any supporting evidence provided?",
+        "Report_Attribute_discloser-intends-to-communicate-further": "Secure Inbox available",
+        "Report_Attribute_case-conclusion": "Conclusion",
+        "Report_Attribute_text": "Responsible Case Manager "
+      },
+      "Report Responses": {
+        "Report_ID": "Case Id",
+        "Question_This_disclosure_will_be_received_by_the_KPMG_FairCall_team": "Responsible Case Manager ",
+        "Question_Would_you_like_to_remain_anonymous": "IdentityDropdown",
+        "Question_Please_provide_your_name_and_contact_details": "ContactInformation",
+        "Question_Consent_to_share_the_content_of_your_report_with_the_nominated_whistleblowing_contacts": "ConsentDropdown",
+        "Question_How_are_you_associated_with_the_organisation": "OrganisationAssociationDropdown",
+        "Question_Please_describe_what_happened": "DetailsTextbox",
+        "Question_Would_you_like_to_provide_supporting_documentation": "DocumentationDropdown",
+        "Question_What_outcome_are_you_seeking": "OutcomeTextbox",
+        "Question_What_location_has_the_concern_occurred_in": "location of concern",
+        "Question_Have_you_raised_your_concerns_via_any_other_channel": "OtherChannelTextbox",
+        "Question_Do_you_have_any_of_the_following_concerns": "WelfareDropdown",
+        "Question_Please_review_your_information": "Thank you for making a disclosure"
+      },
+      "Messages": {
+        "Message_Content": "Communication"
+      },
+      "Case Notes": {
+        "Case_Note_Content": "Casework"
+      },
+      "Files": {
+        "File_Name": "Attachment"
+      },
+      "Status Changes": {
+        "Status_Changed_To": "Current status"
+      },
+      "Unstructured Data": {
+        "Unstructured_Data_Content": [
+          "Internal communications",
+          "Case overview  ",
+          "Field: Welfare Details",
+          "Field: Details of Previous Communications",
+          "Field: Respondent(s) Notes",
+          "Field: Details of Respondent(s)"
+        ]
+      }
+    },
+    "parseTimestamps": true,
+    "savedDate": "2026-02-09T00:00:00.000Z",
+    "sourceColumnsUsed": [
+      "Case Id",
+      "Report date",
+      "Responsible Case Manager ",
+      "ContactInformation",
+      "Field: Previous system Case ID",
+      "Field: 6   Discloser anonymity",
+      "Field: 1  In Scope or Out of Scope or Test",
+      "Field: 5   Reporting Channel",
+      "Classification",
+      "Field: 4  Date report sent to client",
+      "Field: 10   Discloser Type",
+      "Country",
+      "location of concern",
+      "Field: Has this issue been communicated through any other channel?",
+      "WelfareDropdown",
+      "OutcomeTextbox",
+      "Field: Resolution Description",
+      "Field: Was any supporting evidence provided?",
+      "Secure Inbox available",
+      "Conclusion",
+      "IdentityDropdown",
+      "ConsentDropdown",
+      "OrganisationAssociationDropdown",
+      "DetailsTextbox",
+      "DocumentationDropdown",
+      "OtherChannelTextbox",
+      "Thank you for making a disclosure",
+      "Communication",
+      "Casework",
+      "Attachment",
+      "Current status",
+      "Internal communications",
+      "Case overview  ",
+      "Field: Welfare Details",
+      "Field: Details of Previous Communications",
+      "Field: Respondent(s) Notes",
+      "Field: Details of Respondent(s)"
+    ],
+    "nameEmailMappings": [
+      { "name": "Michaela Mitchell", "email": "kpmgfaircall@kpmg.com.au" },
+      { "name": "Jessica Habib", "email": "kpmgfaircall@kpmg.com.au" },
+      { "name": "Natasha Doyle", "email": "kpmgfaircall@kpmg.com.au" },
+      { "name": "By whistleblower", "email": "Reporter" },
+      { "name": "system@elker.com", "email": "kpmgfaircall@kpmg.com.au" }
+    ]
+  },
+  "nameEmailMappings": [
+    { "name": "Michaela Mitchell", "email": "kpmgfaircall@kpmg.com.au" },
+    { "name": "Jessica Habib", "email": "kpmgfaircall@kpmg.com.au" },
+    { "name": "Natasha Doyle", "email": "kpmgfaircall@kpmg.com.au" },
+    { "name": "By whistleblower", "email": "Reporter" },
+    { "name": "system@elker.com", "email": "kpmgfaircall@kpmg.com.au" }
+  ]
+}
