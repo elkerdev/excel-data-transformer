@@ -1601,12 +1601,34 @@
                     const fieldCell = document.createElement('td');
                     fieldCell.style.maxWidth = '280px';
                     fieldCell.style.width = '280px';
-                    fieldCell.innerHTML = `
-                        <div class="target-field">
-                            ${field.name}
-                            ${field.required ? ' <span style="color: #e53e3e; font-size: 16px;">*</span>' : ''}
-                        </div>
-                    `;
+
+                    // Hints for multi-row content fields
+                    const multiRowHints = {
+                        'Message_Content': 'Map to a column with timestamped messages. Each message will become a separate row, with author and date extracted automatically.',
+                        'Case_Note_Content': 'Map to a column with timestamped notes. Each note will become a separate row, with author and date extracted automatically.',
+                        'File_Name': 'Map to a column containing filenames (e.g. one per line like "report.pdf (file)"). Each file will become a separate row.',
+                        'Status_Changed_To': 'Map to the column containing the current status. A status change row will be created for each report.'
+                    };
+                    const hint = multiRowHints[field.name] || '';
+
+                    const fieldNameDiv = document.createElement('div');
+                    fieldNameDiv.className = 'target-field';
+                    fieldNameDiv.textContent = field.name;
+                    if (field.required) {
+                        const requiredSpan = document.createElement('span');
+                        requiredSpan.style.color = '#e53e3e';
+                        requiredSpan.style.fontSize = '16px';
+                        requiredSpan.textContent = ' *';
+                        fieldNameDiv.appendChild(requiredSpan);
+                    }
+                    fieldCell.appendChild(fieldNameDiv);
+
+                    if (hint) {
+                        const hintDiv = document.createElement('div');
+                        hintDiv.style.cssText = 'font-size: 0.75rem; color: #6b7280; margin-top: 2px; line-height: 1.3;';
+                        hintDiv.textContent = hint;
+                        fieldCell.appendChild(hintDiv);
+                    }
                     row.appendChild(fieldCell);
                     
                     // Check if this is an auto-filled field (define once, use throughout)
@@ -1852,6 +1874,7 @@
                 'Report_Attribute_case-conclusion': ['Conclusion', 'Case conclusion'],
                 'Report_Attribute_text': ['Primary Assignee', 'Responsible Case Manager'],
                 'Status_Changed_To': ['Current status', 'Workflow Status', 'Status'],
+                'File_Name': ['Attachment', 'Attachments'],
                 'Message_Content': ['Communication'],
                 'Case_Note_Content': ['Casework', 'Internal communications'],
                 'Question_Please_describe_what_happened': ['What has occurred', 'Case overview']
@@ -2157,6 +2180,27 @@
                             'Case_Note_DateTime': formatDateTime(new Date())
                         });
                     }
+                }
+            } else if (sheetName === 'Files') {
+                const fileNameMapping = mappings['File_Name'];
+                if (fileNameMapping && sourceRow[fileNameMapping]) {
+                    const rawValue = String(sourceRow[fileNameMapping]);
+                    const fileEntries = rawValue.split('\n').map(s => s.trim()).filter(s => s);
+                    fileEntries.forEach(entry => {
+                        const fileName = entry.replace(/\s*\(file\)\s*$/i, '').trim();
+                        if (fileName) {
+                            const uploadedByMapping = mappings['File_Uploaded_By'];
+                            const dateTimeMapping = mappings['File_Uploaded_DateTime'];
+                            const visibilityMapping = mappings['File_Visibility'];
+                            targetSheet.push({
+                                'Report_ID': reportId,
+                                'File_Name': fileName,
+                                'File_Uploaded_By': uploadedByMapping && sourceRow[uploadedByMapping] ? applyNameEmailMappings(sourceRow[uploadedByMapping]) : 'system@elker.com',
+                                'File_Uploaded_DateTime': dateTimeMapping && sourceRow[dateTimeMapping] ? formatDateTime(sourceRow[dateTimeMapping]) : formatDateTime(new Date()),
+                                'File_Visibility': visibilityMapping && sourceRow[visibilityMapping] ? sourceRow[visibilityMapping] : 'All'
+                            });
+                        }
+                    });
                 }
             } else if (sheetName === 'Status Changes') {
                 const statusMapping = mappings['Status_Changed_To'];

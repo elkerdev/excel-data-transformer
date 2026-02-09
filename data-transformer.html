@@ -666,12 +666,13 @@
                     noteCount += matches ? matches.length : 1;
                 }
                 
-                // Count files (check for file attachments mentioned in text)
-                if (row['Supporting documentation'] && row['Supporting documentation'] !== '-1') {
-                    fileCount++;
+                // Count files from Attachment column and Communication
+                if (row['Attachment'] && row['Attachment'].trim()) {
+                    fileCount += row['Attachment'].split('\n').filter(s => s.trim()).length;
                 }
                 if (row['Communication'] && row['Communication'].includes('File attachment:')) {
-                    fileCount++;
+                    const attachMatches = row['Communication'].match(/File attachment:/g);
+                    fileCount += attachMatches ? attachMatches.length : 0;
                 }
                 
                 // Count status changes
@@ -810,17 +811,23 @@
                         });
                     }
 
-                    // Extract Files
-                    if (row['Supporting documentation'] && row['Supporting documentation'] !== '-1') {
-                        files.push({
-                            'Report_ID': reportId,
-                            'File_Name': 'supporting-documentation.pdf',
-                            'File_Uploaded_By': row['Discloser Email Address'] || 'reporter@elker.com',
-                            'File_Uploaded_DateTime': formatDateTime(row['Report date']),
-                            'File_Visibility': 'All'
+                    // Extract Files from Attachment column
+                    if (row['Attachment'] && row['Attachment'].trim()) {
+                        const fileEntries = row['Attachment'].split('\n').map(s => s.trim()).filter(s => s);
+                        fileEntries.forEach(entry => {
+                            const fileName = entry.replace(/\s*\(file\)\s*$/i, '').trim();
+                            if (fileName) {
+                                files.push({
+                                    'Report_ID': reportId,
+                                    'File_Name': fileName,
+                                    'File_Uploaded_By': row['Discloser Email Address'] || 'reporter@elker.com',
+                                    'File_Uploaded_DateTime': formatDateTime(row['Report date']),
+                                    'File_Visibility': 'All'
+                                });
+                            }
                         });
                     }
-                    
+
                     // Check for file attachments in Communication
                     if (row['Communication'] && row['Communication'].includes('File attachment:')) {
                         const fileMatches = row['Communication'].match(/File attachment: ([^\n]+)/g);
