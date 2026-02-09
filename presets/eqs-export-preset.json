@@ -42,7 +42,9 @@
         "Question_What_outcome_are_you_seeking": "OutcomeTextbox",
         "Question_What_location_has_the_concern_occurred_in": "location of concern",
         "Question_Have_you_raised_your_concerns_via_any_other_channel": "OtherChannelTextbox",
-        "Question_Do_you_have_any_of_the_following_concerns": "WelfareDropdown",
+        "Question_Please_provide_details_of_who_you_raised_your_concerns_with_when_and_why_you've_felt_the_need_to_also_raise_them_here": "Field: Details of Previous Communications",
+        "Question_Do_you_have_any_of_the_following_concerns_for_your_welfare_in_sharing_this_information": "WelfareDropdown",
+        "Question_Do_you_intend_to_remain_engaged_involved_while_your_report_is_being_processed_": "Secure Inbox available",
         "Question_Please_review_your_information": "Thank you for making a disclosure"
       },
       "Messages": {
@@ -97,6 +99,7 @@
       "DetailsTextbox",
       "DocumentationDropdown",
       "OtherChannelTextbox",
+      "Field: Details of Previous Communications",
       "Thank you for making a disclosure",
       "Communication",
       "Casework",

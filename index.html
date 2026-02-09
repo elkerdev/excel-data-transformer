@@ -1236,7 +1236,10 @@
                         loadNameEmailMappings(importData.nameEmailMappings);
                     }
 
-                    showStatus('success', `Preset "${presetName}" imported successfully`);
+                    // Apply the mappings to the UI
+                    loadSelectedPreset();
+
+                    showStatus('success', `Preset "${presetName}" imported and applied successfully`);
                 } catch (error) {
                     console.error('Import error:', error);
                     showStatus('error', 'Error reading preset file: ' + error.message);
